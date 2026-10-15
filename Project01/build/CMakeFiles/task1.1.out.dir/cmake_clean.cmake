@@ -1,5 +1,4 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/task1.1.out.dir/link.d"
   "CMakeFiles/task1.1.out.dir/src/main1.1.cpp.o"
   "CMakeFiles/task1.1.out.dir/src/main1.1.cpp.o.d"
   "task1.1.out"

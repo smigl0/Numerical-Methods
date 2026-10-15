@@ -1,1 +1,1 @@
-/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/task1.2.out.dir/link.d CMakeFiles/task1.2.out.dir/src/main1.2.cpp.o -o task1.2.out
+/usr/bin/c++ CMakeFiles/task1.2.out.dir/src/main1.2.cpp.o -o task1.2.out 

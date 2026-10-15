@@ -1,5 +1,6 @@
 // std
 #include <iostream>
+#include <sstream>
 #include <fstream>
 #include <vector>
 #include <memory>
@@ -9,50 +10,55 @@
 const inline double LDA = 2000;
 const inline int ITERATION_COUNT = 30;
 
-void matrix_times_vec(std::vector<double> A, std::vector<double>* x){
-  for(int j=0;j<LDA;j++){
-    for(int i=0;i<LDA;i++){
-      (*x)[j] += (*x)[i]*A[i+j*LDA];
+void matrix_times_vec(const std::vector<double>* A, std::vector<double>* x){
+  std::vector<double> x_new(LDA, 0.0);
+  for(int j=0; j<LDA; j++){
+    double sum = 0.0;
+    for(int i=0; i<LDA; i++){
+      sum += (*x)[i] * (*A)[i + j*LDA];
     };
+    x_new[j] = sum;
   };
+  *x = x_new;
 }
 
-double calc_norm(std::vector<double> x ){
-  double sum=0;
-  for(int i=0; i<LDA;i++){
-    sum += x[i]*x[i]; 
+double calc_norm(const std::vector<double>* x){
+  double sum = 0;
+  for(int i=0; i<LDA; i++){
+    sum += (*x)[i] * (*x)[i];  
   }
   return sqrt(sum);
 }
 
 int main(){
-  int GAMMA_VALUES[] = {2,3};
+  int GAMMA_VALUES[] = {2, 3};
 
-  std::ofstream myFile;
-  myFile.open("../data/task1.1.txt");
   for(const double GAMMA_VALUE : GAMMA_VALUES){
-
-    std::vector<double> x = std::vector<double>(LDA,0);
-    for(int i=0;i<LDA;i++){
-      x[i] = (double)i;
+    std::cout << GAMMA_VALUE << "\n";
+    std::vector<double> x = std::vector<double>(LDA, 0);
+    for(int i=0; i<LDA; i++){
+      x[i] = 1.0;
     };
-    myFile<<"0:"<<calc_norm(x)<<"\n";
 
-    std::vector<double> A = std::vector<double>(LDA*LDA,0);
+    std::ostringstream ss; 
+    ss << "../data/gamma" << GAMMA_VALUE << ".txt";
+    
+    std::ofstream myFile(ss.str(),std::ios::trunc);
+    myFile << calc_norm(&x) << "\n";
+    std::vector<double> A = std::vector<double>(LDA*LDA, 0);
 
-    for(int j=0;j<LDA;j++){
-      for(int i=0;i<LDA;i++){
+    for(int j=0; j<LDA; j++){
+      for(int i=0; i<LDA; i++){
         A[i + j*LDA] = 1/(pow(abs(i-j),4) + GAMMA_VALUE);
       };
     };
 
-    myFile<<"--- GAMMA VALUE= "<<GAMMA_VALUE<<"\n";
-    for(int i=0;i<ITERATION_COUNT;i++){
-      matrix_times_vec(A,&x);
-      myFile<<i+1<<":"<<calc_norm(x)<<"\n";
+    for(int i=0; i<ITERATION_COUNT; i++){
+      matrix_times_vec(&A, &x);
+      myFile << calc_norm(&x) << "\n";
     }
+    myFile.close();
   }
-  myFile.close();
 
   return 0;
 }

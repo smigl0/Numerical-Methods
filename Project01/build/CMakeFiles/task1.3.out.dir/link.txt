@@ -1,1 +1,1 @@
-/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/task1.3.out.dir/link.d CMakeFiles/task1.3.out.dir/src/main1.3.cpp.o -o task1.3.out  -lm /usr/lib/x86_64-linux-gnu/libblas.so
+/usr/bin/c++ CMakeFiles/task1.3.out.dir/src/main1.3.cpp.o -o task1.3.out  -lm /usr/lib/x86_64-linux-gnu/libopenblas.so 
