@@ -1,0 +1,5 @@
+/proj/build/CMakeFiles/task1.1.out.dir
+/proj/build/CMakeFiles/task1.2.out.dir
+/proj/build/CMakeFiles/task1.3.out.dir
+/proj/build/CMakeFiles/edit_cache.dir
+/proj/build/CMakeFiles/rebuild_cache.dir
