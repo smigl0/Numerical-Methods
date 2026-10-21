@@ -1,0 +1,8 @@
+services:
+  build:
+    build: .
+    stdin_open: true
+    tty: true
+    userns_mode: keep-id
+    volumes:
+      - ".:/proj:z"

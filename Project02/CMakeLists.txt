@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.25)
 project(project)
 
-find_package(BLAS)
-add_executable()
+set(BLA_VENDOR OpenBLAS)
+find_package(BLAS REQUIRED)
+find_package(LAPACK REQUIRED)
+add_executable(main src/main.cpp)
+target_link_libraries(main BLAS::BLAS LAPACK::LAPACK -llapacke)
