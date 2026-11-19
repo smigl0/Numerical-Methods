@@ -1,3 +1,0 @@
-/home/kamil/University/Numerical-Methods/Project05/build/CMakeFiles/main.dir
-/home/kamil/University/Numerical-Methods/Project05/build/CMakeFiles/edit_cache.dir
-/home/kamil/University/Numerical-Methods/Project05/build/CMakeFiles/rebuild_cache.dir

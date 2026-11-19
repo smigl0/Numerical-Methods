@@ -1,0 +1,11 @@
+services:
+  build:
+    build: .
+    working_dir: /proj/build
+    volumes:
+      - ./src:/proj/src:Z
+      - ./CMakeLists.txt:/proj/CMakeLists.txt:Z
+    command:
+      - /bin/sh
+      - -c
+      - 'cmake .. && cmake --build . -j"$(nproc)"'

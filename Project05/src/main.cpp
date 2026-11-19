@@ -1,66 +1,18 @@
-#include <vector>
 #include <iomanip>
 #include <iostream>
-#include <cmath>
 #include <fstream>
+#include <string>
 
-#define LDA 6
-#define MAX_RECURSION 150
-
-double dotProd(double* a, double* b){
-  double result=0;
-  for(size_t i=0;i<LDA;i++){
-    result += a[i]*b[i]; 
-  } 
-  return result;
-}
-
-double vectorNorm(double* a){
-  double result=0;
-  for(size_t i=0;i<LDA;i++){
-    result += a[i]*a[i];
-  } 
-  return std::sqrt(result);
-}
-
-void normalize(double* a){
-  double norm = vectorNorm(a);
-  for(size_t i=0;i<LDA;i++){
-    a[i]=a[i]/norm;
-  } 
-}
-
-void matrixVectorMult(double* v, double* a){
-  double result_v[LDA];
-  for(int i=0;i<LDA;i++){
-    double sum=0;
-    for(int j=0;j<LDA;j++){
-      sum+=a[i*LDA+j]*v[j];
-    }
-    result_v[i]= sum;
-  }
-  for(int i=0;i<LDA;i++){
-    v[i] = result_v[i];
-  }
-}
-
-double rayleighQuotient(double*v, double* a){
-  double copy_of_v[LDA];
-  for(int i=0;i<LDA;i++){
-    copy_of_v[i]=v[i];
-  }
-  double norm = dotProd(copy_of_v,copy_of_v);
-  matrixVectorMult(copy_of_v,a); 
-  return dotProd(v,copy_of_v)/norm;
-}
+#include "matrix_operations.cpp"
 
 int main(){
-  double matrix [LDA*LDA];
-  double matrix_inverse [LDA*LDA];
-  double matrix_reconstructed [LDA*LDA];
+  std::vector<double> matrix(LDA*LDA);
+  std::vector<double> matrix_inverse(LDA*LDA);
+  std::vector<double> matrix_reconstructed(LDA*LDA);
 
   std::vector<std::vector<double>> eigenvectors;
-  std::fstream s("eigenvalues.txt",s.binary | s.trunc | s.in | s.out);
+  std::vector<double> eigenvalues;
+  std::fstream s("../data/eigenvalues.txt",s.binary | s.trunc | s.in | s.out);
 
   // Generate matrix
   for(int i=0;i<LDA;i++){
@@ -79,26 +31,35 @@ int main(){
   }
 
   // Begin power method
-  double v[] = {1,2,3,4,5,6};
+  double v[LDA];
+  for(int i=0;i<LDA;i++){
+    v[i]=i;
+  }
 
   for(int n=0;n<LDA;n++){
 
+    std::ofstream eigen_stream("../data/eigenvalue"+std::to_string(n+1)+".txt");
+
     // Power method loop
     for(int i=0;i<MAX_RECURSION;i++){
-      matrixVectorMult(v,matrix);
+      matrixVectorMult(v,matrix.data());
       for(auto vector : eigenvectors){
         double scaling_factor = dotProd(v,vector.data());
         for(int i=0;i<LDA;i++){
           v[i] -= scaling_factor * vector[i];
         }
       }
+      eigen_stream<<std::setprecision(15)<<rayleighQuotient(v,matrix.data())<<",\n";
       normalize(v);
     }
 
-    std::cout<<"λ No."<<n<<": "<<rayleighQuotient(v,matrix)<<"\n";
-    s<<rayleighQuotient(v,matrix)<<",";
+    std::cout<<"λ No."<<n+1<<": "<<rayleighQuotient(v,matrix.data())<<"\n";
+    s<<std::setprecision(8)<<rayleighQuotient(v,matrix.data())<<",";
     normalize(v);
-    eigenvectors.push_back(std::vector<double>(v,v+LDA));
+    eigenvalues.push_back(rayleighQuotient(v,matrix.data()));
+    std::vector<double> eigenvector_to_push = std::vector<double>(v,v+LDA);
+    normalize(eigenvector_to_push.data());
+    eigenvectors.push_back(eigenvector_to_push);
 
     for(int i=0;i<LDA;i++){
       v[i]=i;
@@ -107,7 +68,7 @@ int main(){
   
   s<<"\n";
   s.close();
-  s.open("eigenvectors.txt",s.binary | s.trunc | s.in | s.out);
+  s.open("../data/eigenvectors.txt",s.binary | s.trunc | s.in | s.out);
   for(auto vector : eigenvectors){
     for(auto index : vector){
       s<<index<<",";
@@ -116,14 +77,33 @@ int main(){
   }
   s.close();
 
-  for(int i=0;i<LDA;i++){
-    double temp_vector[LDA];
-    for(int n=0;n<LDA;n++){
-      temp_vector[n]=eigenvectors[i][n];
+  // Recconstruct matrix
+  for(int n=0;n<LDA;n++){
+    std::vector<double> outer_product_matrix = outerProd(eigenvectors[n].data(),eigenvectors[n].data());
+    for(int i=0;i<LDA*LDA;i++){
+      matrix_reconstructed[i]+= outer_product_matrix[i]*eigenvalues[n];
+      matrix_inverse[i]+= outer_product_matrix[i]*std::pow(eigenvalues[n],-1);
     }
-    normalize(temp_vector);
+  }
 
+  //Reprint & remove terms approaching 0 (error<1e-8)
+  std::cout<<"-- Original: \n";
+  for(int i=0;i<LDA;i++){
+    for(int j=0;j<LDA;j++){
+      if(std::abs(matrix_reconstructed[j+i*LDA])<1e-8){matrix_reconstructed[j+i*LDA] = std::round(matrix_reconstructed[j+i*LDA]);}
+      std::cout<<std::setw(6)<<std::setprecision(2)<<matrix_reconstructed[j+i*LDA]<<" ";
+    }
+    std::cout<<"\n";
+  }
+  std::cout<<"-- Inverse \n";
+  for(int i=0;i<LDA;i++){
+    for(int j=0;j<LDA;j++){
+      std::cout<<std::setw(6)<<std::setprecision(2)<<matrix_inverse[j+i*LDA]<<" ";
+    }
+    std::cout<<"\n";
   }
   
+  std::cout<<"-- A^-1 * A\n";
+  printMatrix(matrixProd(matrix_reconstructed,matrix_inverse).data());
   return 0;
 }
