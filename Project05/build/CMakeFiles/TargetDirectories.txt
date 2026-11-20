@@ -1,0 +1,3 @@
+/home/txg638@ds.mot.com/University/Numerical-Methods/Project05/build/CMakeFiles/main.dir
+/home/txg638@ds.mot.com/University/Numerical-Methods/Project05/build/CMakeFiles/edit_cache.dir
+/home/txg638@ds.mot.com/University/Numerical-Methods/Project05/build/CMakeFiles/rebuild_cache.dir

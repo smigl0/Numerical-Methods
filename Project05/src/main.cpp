@@ -37,11 +37,14 @@ int main(){
   }
 
   for(int n=0;n<LDA;n++){
-
     std::ofstream eigen_stream("../data/eigenvalue"+std::to_string(n+1)+".txt");
 
     // Power method loop
+    int loop_count=0;
+    double previous_lambda=0;
+
     for(int i=0;i<MAX_RECURSION;i++){
+      loop_count++;
       matrixVectorMult(v,matrix.data());
       for(auto vector : eigenvectors){
         double scaling_factor = dotProd(v,vector.data());
@@ -51,9 +54,13 @@ int main(){
       }
       eigen_stream<<std::setprecision(15)<<rayleighQuotient(v,matrix.data())<<",\n";
       normalize(v);
+
+      double lambda = rayleighQuotient(v,matrix.data());
+      if(std::abs(lambda-previous_lambda)<NUMERICAL_ERROR){break;}
+      previous_lambda = lambda;
     }
 
-    std::cout<<"λ No."<<n+1<<": "<<rayleighQuotient(v,matrix.data())<<"\n";
+    std::cout<<"λ No."<<n+1<<": "<<rayleighQuotient(v,matrix.data())<<" ("<<loop_count<<" loops)\n";
     s<<std::setprecision(8)<<rayleighQuotient(v,matrix.data())<<",";
     normalize(v);
     eigenvalues.push_back(rayleighQuotient(v,matrix.data()));
@@ -86,15 +93,6 @@ int main(){
     }
   }
 
-  //Reprint & remove terms approaching 0 (error<1e-8)
-  std::cout<<"-- Original: \n";
-  for(int i=0;i<LDA;i++){
-    for(int j=0;j<LDA;j++){
-      if(std::abs(matrix_reconstructed[j+i*LDA])<1e-8){matrix_reconstructed[j+i*LDA] = std::round(matrix_reconstructed[j+i*LDA]);}
-      std::cout<<std::setw(6)<<std::setprecision(2)<<matrix_reconstructed[j+i*LDA]<<" ";
-    }
-    std::cout<<"\n";
-  }
   std::cout<<"-- Inverse \n";
   for(int i=0;i<LDA;i++){
     for(int j=0;j<LDA;j++){

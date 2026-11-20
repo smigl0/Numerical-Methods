@@ -1,6 +1,7 @@
 #pragma once
 #define LDA 6
 #define MAX_RECURSION 150
+#define NUMERICAL_ERROR 1e-8
 
 #include <cmath>
 #include <iostream>
@@ -75,6 +76,23 @@ std::vector<double> matrixProd(std::vector<double> a, std::vector<double> b){
     }
   }  
   return result;
+}
+
+double calcResidual(std::vector<double> v,std::vector<double> matrix, double eigenvalue){ 
+  double residual_vector[LDA];
+  double matrix_product_vector[LDA];
+  double scalar_product_vector[LDA] ;
+
+  std::copy(v.begin(),v.end(),matrix_product_vector);
+  std::copy(v.begin(),v.end(),scalar_product_vector);
+
+  matrixVectorMult(matrix_product_vector,matrix.data());
+  for(int i=0;i<LDA;i++) {
+    scalar_product_vector[i]*=eigenvalue;
+    residual_vector[i]-=scalar_product_vector[i];
+  }
+  
+  return vectorNorm(residual_vector); 
 }
 
 void printMatrix(double* matrix){

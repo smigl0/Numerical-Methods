@@ -4,6 +4,7 @@ services:
     working_dir: /proj/build
     volumes:
       - ./src:/proj/src:Z
+      - ./build:/proj/build:Z
       - ./CMakeLists.txt:/proj/CMakeLists.txt:Z
     command:
       - /bin/sh
